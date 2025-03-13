@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect } from "react"
 import { IoClose } from "react-icons/io5"
 import { WalletEntry } from "../types"
 import dynamic from "next/dynamic"
@@ -16,7 +16,7 @@ interface Props {
   onCreateWallet: (emoji: string, address: string, name: string, disconnect?: boolean) => void
 }
 
-// 1) Animal-only emojis
+// Animal-only emojis
 const ANIMAL_EMOJIS = [
   "🐶","🐱","🐭","🐹","🐰","🦊","🐻","🐼","🐨","🐯","🦁",
   "🐮","🐷","🐸","🐵","🐔","🐦","🐤","🐴","🐗","🐺","🦝",
@@ -46,7 +46,7 @@ export default function CreateWalletModal({
       setWalletAddress(editingWallet.address)
       setPortfolioName(editingWallet.name)
     } else {
-      // 2) Not editing => pick random animal
+      // Not editing => pick random animal
       const randomIdx = Math.floor(Math.random() * ANIMAL_EMOJIS.length)
       setSelectedEmoji(ANIMAL_EMOJIS[randomIdx])
 
@@ -57,12 +57,67 @@ export default function CreateWalletModal({
 
   if (!isOpen) return null
 
+  // [LOCALSTORAGE CHANGE] function to add or remove in localStorage
+  function updateLocalStorage(addOrRemove: "add"|"remove", address: string, newWallet?: WalletEntry) {
+    try {
+      const raw = localStorage.getItem("eztrelaWallets") // or "wallets"
+      const stored: WalletEntry[] = raw ? JSON.parse(raw) : []
+
+      if (addOrRemove === "add" && newWallet) {
+        // push new
+        stored.push(newWallet)
+      } else if (addOrRemove === "remove") {
+        // remove any matching address
+        const idx = stored.findIndex((w) => w.address === address)
+        if (idx !== -1) {
+          stored.splice(idx, 1)
+        }
+      }
+      // write back
+      localStorage.setItem("eztrelaWallets", JSON.stringify(stored))
+    } catch (err) {
+      console.error("Error updating localStorage wallets:", err)
+    }
+  }
+
   function handleSubmit() {
-    onCreateWallet(selectedEmoji, walletAddress, portfolioName)
+    // create or edit
+    const trimmedAddr = walletAddress.trim()
+    const trimmedName = portfolioName.trim()
+    if (!trimmedAddr || !trimmedName) {
+      // optionally handle user error, 
+      // but typically you rely on parent's walletError
+    }
+
+    if (!editingWallet) {
+      // new wallet => store in localStorage
+      // [LOCALSTORAGE CHANGE]
+      updateLocalStorage("add", trimmedAddr, {
+        avatar: selectedEmoji,
+        address: trimmedAddr,
+        name: trimmedName,
+      } as WalletEntry)
+    } else {
+      // editing => remove old, re-add new if user changed address
+      // or just re-add with the new data
+      updateLocalStorage("remove", editingWallet.address)
+      updateLocalStorage("add", trimmedAddr, {
+        avatar: selectedEmoji,
+        address: trimmedAddr,
+        name: trimmedName,
+      } as WalletEntry)
+    }
+
+    // call parent's logic
+    onCreateWallet(selectedEmoji, trimmedAddr, trimmedName)
   }
 
   function handleDisconnect() {
     if (!editingWallet) return
+
+    // [LOCALSTORAGE CHANGE] remove from localStorage
+    updateLocalStorage("remove", editingWallet.address)
+
     onCreateWallet(selectedEmoji, editingWallet.address, editingWallet.name, true)
   }
 

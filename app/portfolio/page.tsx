@@ -18,7 +18,7 @@ import CreateWalletModal from "./components/CreateWalletModal"
 import { Chart, ArcElement } from "chart.js"
 Chart.register(ArcElement)
 
-const EB_BASE_URL = "http://localhost:8000"
+const EB_BASE_URL = "https://eztrella-api-865549513483.us-central1.run.app";
 
 export default function PortfolioPage() {
   // --------------------------------------------------
@@ -52,12 +52,17 @@ export default function PortfolioPage() {
   const [isAiOpen, setIsAiOpen] = useState(false)
   const [analysisLoading, setAnalysisLoading] = useState(false)
   const rotatingMsgs = [
-    "Evaluating Latest News…",
-    "Analyzing Portfolio Distribution…",
-    "Fetching Market Sentiment…",
-    "Calculating Risk Metrics…",
-    "Compiling AI Insights…",
-  ]
+    "Analyzing On-Chain Transaction Data…",
+    "Assessing Token Volatility Trends…",
+    "Gathering Real-Time Market Indicators…",
+    "Evaluating Liquidity and Volume Metrics…",
+    "Processing Sentiment from Social Channels…",
+    "Simulating Portfolio Performance Scenarios…",
+    "Correlating Macro Trends with Token Data…",
+    "Generating Insights from Blockchain Activity…",
+    "Cross-Referencing Historical Price Patterns…",
+    "Finalizing AI-Driven Market Outlook…",
+  ];
   const [currentMsg, setCurrentMsg] = useState(rotatingMsgs[0])
   const msgIndexRef = useRef(0)
   const [analysisText, setAnalysisText] = useState("")
@@ -66,6 +71,13 @@ export default function PortfolioPage() {
   const [chatInput, setChatInput] = useState("")
   const [isChatLoading, setIsChatLoading] = useState(false)
 
+  // Handle check if wallet previously saved
+  useEffect(() => {
+    let existingWallets = localStorage.getItem("eztrelaWallets");
+    if(existingWallets){
+      setWallets(JSON.parse(existingWallets) )
+    }
+  }, [])
   // rotating messages effect
   useEffect(() => {
     if (!analysisLoading) {
