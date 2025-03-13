@@ -1,19 +1,25 @@
+"use client"
+
 import "./globals.css"
 import { Inter } from "next/font/google"
 import { Providers } from "./providers"
 import Link from "next/link"
 import { MdHome, MdFolderSpecial, MdSearch } from "react-icons/md"
 import MoonToggle from "../components/MoonToggle"
+import { useUnlockTime } from "./hooks/useUnlockTime"
+import CountdownTimer from "./components/CountdownTimer"
 
 const inter = Inter({ subsets: ["latin"] })
 
 
-export const metadata = {
-  title: "Eztrela AI",
-  description: "Your AI-powered crypto platform",
-}
+// export const metadata = {
+//   title: "Eztrela AI",
+//   description: "Your AI-powered crypto platform",
+// }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  const { unlockTime, isUnlocked } = useUnlockTime();
+
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
@@ -109,7 +115,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body
         className={`${inter.className} bg-white text-black dark:bg-gray-900 dark:text-white transition-colors duration-300`}
       >
-        <Providers>
+        {!isUnlocked ? 
+          (
+
+            <main className="relative" style={{ height: "calc(100vh)" }}>
+                <CountdownTimer unlockTime={unlockTime}/>
+          </main>
+          ) : <Providers>
           {/* HEADER */}
           <header className="flex items-center justify-between px-6 py-3 border-b border-gray-200 dark:border-gray-700">
             {/* LEFT: "Eztrela" text */}
@@ -146,6 +158,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             {children}
           </main>
         </Providers>
+  }
+        
       </body>
     </html>
   )

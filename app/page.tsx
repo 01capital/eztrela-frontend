@@ -4,7 +4,7 @@ import { motion } from "framer-motion"
 import Image from "next/image"
 import heroImage from "../public/assets/eztrela-hq-green.png" // your logo/image
 
-export default function HomePage() {
+export default function HomePage() {  
   return (
     <div className="bg-white dark:bg-gray-900 text-black dark:text-white transition-colors duration-300">
 
